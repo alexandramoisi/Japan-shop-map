@@ -15,7 +15,6 @@
   --bg: #eceeec; --surface: #f8f9f8; --ink: #1b1f22; --muted: #5b6469; --line: #d2d7d4;
   --accent: #2f4f86; --accent-ink: #ffffff;
   --c-clothing: #2f4f86; --c-shoes: #8b5a2b; --c-issey: #7a3e8e; --c-second: #2b7651; --c-market: #bf5a22; --c-basics: #4c5862;
-  --tile-filter: none;
   --font-display: "Zen Kaku Gothic New", "Hiragino Sans", "Helvetica Neue", Arial, sans-serif;
   --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -26,7 +25,6 @@
     --bg: #121517; --surface: #1b1f22; --ink: #e6e9ea; --muted: #9aa3a8; --line: #2e3438;
     --accent: #8fb0e6; --accent-ink: #10161f;
     --c-clothing: #86a7e2; --c-shoes: #d39b63; --c-issey: #c690da; --c-second: #6cc497; --c-market: #f09a5f; --c-basics: #a9b5bf;
-    --tile-filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.6);
     color-scheme: dark;
   }
 }
@@ -58,7 +56,6 @@ button { cursor: pointer; }
 .mapwrap { position: sticky; top: max(12px, env(safe-area-inset-top, 0px)); height: calc(100vh - 40px); min-height: 420px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); }
 @media (max-width: 860px) { .mapwrap { position: relative; top: 0; height: 58vh; min-height: 340px; } }
 #map { width: 100%; height: 100%; background: var(--bg); }
-.leaflet-tile-pane { filter: var(--tile-filter); }
 .leaflet-container { font-family: var(--font-body); }
 .leaflet-bar a { background: var(--surface); color: var(--ink); border-color: var(--line); }
 .leaflet-control-attribution { background: color-mix(in srgb, var(--surface) 85%, transparent) !important; color: var(--muted); }
@@ -70,6 +67,15 @@ button { cursor: pointer; }
 .mk.sel { transform: scale(1.35); outline: 2px solid var(--ink); outline-offset: 2px; }
 .mkwrap { background: none; border: 0; }
 
+.locbtn { width: 34px; height: 34px; display: grid; place-items: center; background: var(--surface); color: var(--ink); border: 2px solid rgba(0,0,0,0.2); border-radius: 4px; background-clip: padding-box; padding: 0; }
+.locbtn svg { width: 18px; height: 18px; }
+.locbtn.on { color: var(--accent); }
+.locbtn.busy svg { animation: spin 1.2s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.me { display: block; width: 18px; height: 18px; border-radius: 50%; background: #2a7de1; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(42,125,225,0.35), 0 1px 4px rgba(0,0,0,0.4); }
+.toast { position: absolute; left: 50%; transform: translateX(-50%); top: 52px; z-index: 700; background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 10px; font-size: 0.85rem; max-width: calc(100% - 40px); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+.sortrow { display: inline-flex; gap: 6px; }
+.dist { font-family: var(--font-data); font-size: 0.78rem; color: var(--accent); }
 .areas { position: absolute; top: 10px; left: 56px; right: 10px; z-index: 500; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
 .areabtn { pointer-events: auto; border: 1px solid var(--line); background: var(--surface); padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
 .areabtn[aria-pressed="true"] { border-color: var(--ink); }
@@ -149,6 +155,7 @@ button { cursor: pointer; }
     <div class="areas" id="areas"></div>
     <div class="legend" id="legend"></div>
     <div class="pop" id="pop" hidden></div>
+    <div class="toast" id="toast" role="status" hidden></div>
   </section>
 
   <aside class="side">
@@ -164,7 +171,7 @@ button { cursor: pointer; }
         <div class="fgroup" id="f-style"><span class="flabel">Style</span></div>
         <div class="fgroup" id="f-price"><span class="flabel">Price</span></div>
       </div>
-      <div class="summary"><span id="shown"></span><button type="button" class="linkbtn" id="clear">Clear filters</button></div>
+      <div class="summary"><span id="shown"></span><span class="sortrow" id="sort" hidden></span><button type="button" class="linkbtn" id="clear">Clear filters</button></div>
       <div class="list" id="list"></div>
     </div>
     <div id="panel-routes" class="side" hidden></div>
@@ -177,6 +184,7 @@ button { cursor: pointer; }
         <li>Issey Miyake costs roughly half the European price: a Homme Plissé Tailored Pleats 1 jacket is <span class="num">¥63,800–66,000</span> in Japan versus <span class="num">€880–940</span> in the EU.</li>
         <li>Back in Switzerland, goods over CHF 300 per person owe 8.1% import VAT at the red channel.</li>
         <li>Pins are placed by hand and can be off by a block. Use the Google Maps link for directions.</li>
+        <li>Tap the location button on the map to see where you are. In Tokyo or Kyoto, shops then show their distance and can be sorted nearest first.</li>
         <li>Japanese sizes run small; many unisex labels use 1/2/3. Markets are cash only.</li>
       </ul>
     </details>
