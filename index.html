@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tokyo &amp; Kyoto Shop Map</title>
+<meta name="description" content="Minimal Japanese clothing, shoes, Issey Miyake, gorpcore, second-hand and markets in Tokyo and Kyoto.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+/* Layout: OpenStreetMap on the left (sticky on desktop), filter rail + shop index on the right; stacks on phones. */
+:root {
+  --bg: #eceeec; --surface: #f8f9f8; --ink: #1b1f22; --muted: #5b6469; --line: #d2d7d4;
+  --accent: #2f4f86; --accent-ink: #ffffff;
+  --c-clothing: #2f4f86; --c-shoes: #8b5a2b; --c-issey: #7a3e8e; --c-second: #2b7651; --c-market: #bf5a22; --c-basics: #4c5862;
+  --tile-filter: none;
+  --font-display: "Zen Kaku Gothic New", "Hiragino Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121517; --surface: #1b1f22; --ink: #e6e9ea; --muted: #9aa3a8; --line: #2e3438;
+    --accent: #8fb0e6; --accent-ink: #10161f;
+    --c-clothing: #86a7e2; --c-shoes: #d39b63; --c-issey: #c690da; --c-second: #6cc497; --c-market: #f09a5f; --c-basics: #a9b5bf;
+    --tile-filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.6);
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(18px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(32px, env(safe-area-inset-bottom, 0px));
+}
+[hidden] { display: none !important; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: 16px; }
+.brand h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.5rem, 3.2vw, 2.1rem); line-height: 1.1; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.brand p { margin: 6px 0 0; color: var(--muted); max-width: 60ch; font-size: 0.93rem; }
+.citytoggle { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--surface); }
+.citytoggle button { border: 0; background: transparent; padding: 7px 16px; border-radius: 999px; display: inline-flex; align-items: baseline; gap: 8px; font-weight: 600; }
+.citytoggle button .kanji { font-family: var(--font-display); font-size: 1.05rem; }
+.citytoggle button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.mapwrap { position: sticky; top: max(12px, env(safe-area-inset-top, 0px)); height: calc(100vh - 40px); min-height: 420px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); }
+@media (max-width: 860px) { .mapwrap { position: relative; top: 0; height: 58vh; min-height: 340px; } }
+#map { width: 100%; height: 100%; background: var(--bg); }
+.leaflet-tile-pane { filter: var(--tile-filter); }
+.leaflet-container { font-family: var(--font-body); }
+.leaflet-bar a { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.leaflet-control-attribution { background: color-mix(in srgb, var(--surface) 85%, transparent) !important; color: var(--muted); }
+.leaflet-control-attribution a { color: var(--accent); }
+
+.mk { display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--c); border: 2px solid var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.35); font-family: var(--font-data); font-size: 10px; font-weight: 500; color: var(--surface); line-height: 1; transition: transform 0.15s; }
+.mk.num { width: 22px; height: 22px; }
+.mk.dim { opacity: 0.2; box-shadow: none; }
+.mk.sel { transform: scale(1.35); outline: 2px solid var(--ink); outline-offset: 2px; }
+.mkwrap { background: none; border: 0; }
+
+.areas { position: absolute; top: 10px; left: 56px; right: 10px; z-index: 500; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
+.areabtn { pointer-events: auto; border: 1px solid var(--line); background: var(--surface); padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+.areabtn[aria-pressed="true"] { border-color: var(--ink); }
+.legend { position: absolute; left: 10px; bottom: 26px; z-index: 500; display: flex; flex-wrap: wrap; gap: 4px 10px; background: color-mix(in srgb, var(--surface) 90%, transparent); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; font-size: 0.75rem; max-width: calc(100% - 20px); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.sw { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+
+.pop { position: absolute; left: 10px; right: 10px; bottom: 74px; z-index: 600; max-width: 360px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+.pop h3 { margin: 0 24px 2px 0; font-family: var(--font-display); font-size: 1.05rem; }
+.pop .meta { color: var(--muted); font-size: 0.82rem; }
+.pop .x { position: absolute; top: 6px; right: 8px; border: 0; background: transparent; font-size: 1.2rem; color: var(--muted); }
+
+.side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tabs button { border: 0; background: transparent; padding: 8px 12px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tabs .count { font-family: var(--font-data); font-weight: 500; font-size: 0.8rem; color: var(--muted); }
+.filters { display: flex; flex-direction: column; gap: 10px; }
+.fgroup { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.flabel { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); width: 100%; font-weight: 600; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 11px; font-size: 0.84rem; display: inline-flex; align-items: center; gap: 6px; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip .yen { font-family: var(--font-data); }
+.search { width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 12px; }
+.summary { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 0.85rem; color: var(--muted); }
+.linkbtn { border: 0; background: transparent; color: var(--accent); padding: 0; font-weight: 600; font-size: 0.85rem; }
+.list { display: flex; flex-direction: column; gap: 10px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: 4px minmax(0, 1fr); gap: 0 12px; scroll-margin: 16px; }
+.card.sel { border-color: var(--ink); }
+.card .stripe { border-radius: 4px; }
+.card h3 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.02rem; line-height: 1.3; }
+.card .head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.card .price { font-family: var(--font-data); font-weight: 500; white-space: nowrap; font-size: 0.9rem; }
+.card .meta { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+.card .why { margin: 6px 0 0; font-size: 0.9rem; }
+.card .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
+.tag { font-size: 0.72rem; border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; }
+.next { font-family: var(--font-data); font-size: 0.78rem; color: var(--ink); background: color-mix(in srgb, var(--c-market) 18%, transparent); border-radius: 6px; padding: 1px 7px; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; align-items: center; }
+.actions a, .actions button { font-size: 0.82rem; font-weight: 600; color: var(--accent); text-decoration: none; background: none; border: 0; padding: 0; display: inline-flex; align-items: center; gap: 4px; }
+.actions a:hover, .actions button:hover { text-decoration: underline; }
+.save[aria-pressed="true"] { color: var(--c-market); }
+.save svg { width: 14px; height: 14px; }
+.empty { border: 1px dashed var(--line); border-radius: 12px; padding: 18px; color: var(--muted); font-size: 0.9rem; }
+.route { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.route[aria-current="true"] { border-color: var(--ink); }
+.route h3 { margin: 0; font-family: var(--font-display); font-size: 1rem; }
+.route p { margin: 4px 0 0; font-size: 0.86rem; color: var(--muted); }
+.route ol { margin: 10px 0 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.route li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; font-size: 0.88rem; align-items: baseline; }
+.route li .n { font-family: var(--font-data); font-size: 0.78rem; color: var(--muted); text-align: right; }
+.route li button { border: 0; background: none; padding: 0; text-align: left; color: var(--ink); }
+.route li button:hover { text-decoration: underline; }
+.route .show { margin-top: 10px; }
+.tips { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px 14px; font-size: 0.88rem; }
+.tips summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+.tips ul { margin: 0 0 10px; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.tips .num { font-family: var(--font-data); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>Tokyo &amp; Kyoto Shop Map</h1>
+    <p>Minimal Japanese clothing, shoes, Issey Miyake, gorpcore, second-hand and markets. Filter, tap a pin, save favourites, or follow a day route.</p>
+  </div>
+  <div class="citytoggle" role="group" aria-label="City">
+    <button type="button" id="city-tokyo" aria-pressed="true"><span class="kanji">東京</span>Tokyo</button>
+    <button type="button" id="city-kyoto" aria-pressed="false"><span class="kanji">京都</span>Kyoto</button>
+  </div>
+</header>
+
+<div class="layout">
+  <section class="mapwrap" aria-label="Map">
+    <div id="map"></div>
+    <div class="areas" id="areas"></div>
+    <div class="legend" id="legend"></div>
+    <div class="pop" id="pop" hidden></div>
+  </section>
+
+  <aside class="side">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab-shops" aria-selected="true">Shops</button>
+      <button type="button" role="tab" id="tab-routes" aria-selected="false">Day routes</button>
+      <button type="button" role="tab" id="tab-saved" aria-selected="false">Saved <span class="count" id="savedcount">0</span></button>
+    </div>
+    <div id="panel-shops" class="side">
+      <div class="filters">
+        <input class="search" id="q" type="search" placeholder="Search shops, areas, brands" aria-label="Search">
+        <div class="fgroup" id="f-cat"><span class="flabel">Type</span></div>
+        <div class="fgroup" id="f-style"><span class="flabel">Style</span></div>
+        <div class="fgroup" id="f-price"><span class="flabel">Price</span></div>
+      </div>
+      <div class="summary"><span id="shown"></span><button type="button" class="linkbtn" id="clear">Clear filters</button></div>
+      <div class="list" id="list"></div>
+    </div>
+    <div id="panel-routes" class="side" hidden></div>
+    <div id="panel-saved" class="side" hidden></div>
+    <details class="tips">
+      <summary>Good to know</summary>
+      <ul>
+        <li>Price key: <span class="num">¥</span> about COS money or less, <span class="num">¥¥</span> shirts around <span class="num">¥20,000–30,000</span>, <span class="num">¥¥¥</span> splurge.</li>
+        <li>Since 1 November 2026 you pay the 10% consumption tax at the till and claim it back at customs when leaving Japan. Keep passport, receipts and goods together.</li>
+        <li>Issey Miyake costs roughly half the European price: a Homme Plissé Tailored Pleats 1 jacket is <span class="num">¥63,800–66,000</span> in Japan versus <span class="num">€880–940</span> in the EU.</li>
+        <li>Back in Switzerland, goods over CHF 300 per person owe 8.1% import VAT at the red channel.</li>
+        <li>Pins are placed by hand and can be off by a block. Use the Google Maps link for directions.</li>
+        <li>Japanese sizes run small; many unisex labels use 1/2/3. Markets are cash only.</li>
+      </ul>
+    </details>
+  </aside>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
