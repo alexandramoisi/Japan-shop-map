@@ -28,6 +28,6 @@ Copy an entry in `SHOPS` in `data.js` and change the fields:
 - `lat`/`lng`: right-click the spot in Google Maps to copy them. Use `null` to keep a shop off the map.
 - Markets take `monthly: 21` (day of month) or `dates: ["2026-12-12", ...]` and show the next date automatically.
 
-Pins were placed by hand from addresses and can be off by a block; each shop links to Google Maps for directions. Saved shops are stored in the visitor's own browser.
+Pin positions were checked against Google Maps listings (November 2026); each shop links to Google Maps for directions. Saved shops are stored in the visitor's own browser.
 
 Map data © OpenStreetMap contributors.
