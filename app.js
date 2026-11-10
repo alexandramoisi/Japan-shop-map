@@ -69,12 +69,18 @@ function distTo(s) { return meters([state.loc.lat, state.loc.lng], [s.lat, s.lng
 /* ---------- Leaflet map ---------- */
 var map = L.map("map", { zoomControl: true, attributionControl: true });
 var darkMq = window.matchMedia("(prefers-color-scheme: dark)");
-function tileUrl() { return "https://{s}.basemaps.cartocdn.com/" + (darkMq.matches ? "dark_all" : "light_all") + "/{z}/{x}/{y}{r}.png"; }
-var tiles = L.tileLayer(tileUrl(), {
-  maxZoom: 20, subdomains: "abcd",
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-}).addTo(map);
-function onScheme() { tiles.setUrl(tileUrl()); drawPins(); }
+function styleUrl() { return "https://tiles.openfreemap.org/styles/" + (darkMq.matches ? "dark" : "positron"); }
+var ATTR = '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/" target="_blank">OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>';
+var base;
+if (L.maplibreGL) {
+  base = L.maplibreGL({ style: styleUrl(), attribution: ATTR }).addTo(map);
+} else {
+  base = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+}
+function onScheme() {
+  if (base.getMaplibreMap) { try { base.getMaplibreMap().setStyle(styleUrl()); } catch (e) {} }
+  drawPins();
+}
 if (darkMq.addEventListener) darkMq.addEventListener("change", onScheme); else if (darkMq.addListener) darkMq.addListener(onScheme);
 var markerLayer = L.layerGroup().addTo(map);
 var routeLayer = L.layerGroup().addTo(map);
