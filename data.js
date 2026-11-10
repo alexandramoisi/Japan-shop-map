@@ -7,7 +7,7 @@ var CATS = {
   market: { label: "Markets", v: "--c-market" },
   basics: { label: "Basics & bags", v: "--c-basics" }
 };
-var STYLES = ["Minimal", "Gorpcore", "Yohji", "Craft"];
+var STYLES = ["Minimal", "Gorpcore", "Yohji", "yoshiokubo", "Craft"];
 
 // p: [min,max] price tier, null = varies
 var SHOPS = [
@@ -35,6 +35,9 @@ var SHOPS = [
  {id:"t21",city:"tokyo",cat:"clothing",style:["Minimal"],p:[3,3],name:"Auralee",area:"Minami-Aoyama, near the Nezu Museum",why:"The benchmark for fabric-led Japanese minimalism.",lat:35.661158,lng:139.716411,src:"https://monocle.com/fashion/retail/japanese-clothing-brands-to-know-and-love/"},
  {id:"t22",city:"tokyo",cat:"clothing",style:["Minimal"],p:[3,3],name:"Kaptain Sunshine",area:"Minami-Aoyama 5-18-10",hours:"12:00–20:00, closed Mon",why:"Refined, washable smart-casual, mainly menswear; flagship opened March 2025.",lat:35.660029,lng:139.713783,src:"https://www.fashionsnap.com/article/2025-02-28/kaptain-sunshine-flagship-store/"},
  // ---- Tokyo shoes
+ {id:"t47",city:"tokyo",cat:"clothing",style:["yoshiokubo"],p:[2,3],name:"LOVELESS Aoyama",area:"Minami-Aoyama 3-16-1, near Omotesando Station A4",why:"Select shop that stocks both yoshiokubo (men) and muller of yoshiokubo (women): precise patterns, gathers and technical fabrics. Tees ¥18–26k, trousers ¥28–42k, jackets ¥75k+. Pin approximate.",lat:35.664900,lng:139.713800,src:"https://mullerofyoshiokubo.jp/pages/stockist"},
+ {id:"t48",city:"tokyo",cat:"clothing",style:["yoshiokubo"],p:[2,3],name:"PARIGOT Ginza (Ginza Six)",area:"Ginza Six 4F",why:"Carries muller of yoshiokubo and sells yoshio kubo online; same floor as Ground Y.",lat:35.669669,lng:139.764076,src:"https://www.parigot.jp/c/brand/yoshiokubo"},
+ {id:"t49",city:"tokyo",cat:"clothing",style:["yoshiokubo"],p:[2,3],name:"KEY TIMEZ Womens Omotesando",area:"Omotesando Hills B1F",why:"Stocks muller of yoshiokubo; one floor from Y's.",lat:35.667287,lng:139.708736,src:"https://mullerofyoshiokubo.jp/pages/stockist"},
  {id:"t23",city:"tokyo",cat:"shoes",style:["Minimal"],p:[1,1],name:"Moonstar Jiyugaoka",area:"Jiyugaoka",why:"Kurume maker since 1873; ‘Fine Vulcanized’ canvas sneakers, slip-ons and rain-proof high-tops.",lat:35.608820,lng:139.666856,src:"https://www.timeout.com/tokyo/shopping/best-places-to-buy-elevated-wardrobe-staples-in-tokyo"},
  {id:"t24",city:"tokyo",cat:"shoes",style:["Minimal"],p:[2,2],name:"Spingle Ginza",area:"Ginza 3-4-17",hours:"11:00–19:00, open daily",why:"Hand-made Hiroshima leather sneakers with the wrapped-up sole; flagship-only models.",lat:35.673082,lng:139.765752,src:"https://en.spingle.jp/blogs/news/spingle-ginza-open"},
  {id:"t25",city:"tokyo",cat:"shoes",style:["Minimal"],p:[2,2],name:"Spingle Harajuku",area:"6-18-3 Jingumae",why:"Second Spingle shop, between Shibuya and Harajuku.",lat:35.664565,lng:139.702991,src:"https://matcha-jp.com/en/place-master/16274"},
@@ -78,6 +81,8 @@ var SHOPS = [
  {id:"k11",city:"kyoto",cat:"clothing",style:["Yohji"],p:[3,3],name:"FASCINATE Kyoto",area:"Gokomachi, 416-5 Dainichi-cho",why:"Kyoto stockist of Y's for men and Ground Y.",lat:35.004337,lng:135.766079,src:"https://fascinate-online.com/english/brand/ground-y"},
  {id:"k12",city:"kyoto",cat:"clothing",style:["Minimal"],p:[3,3],name:"Graphpaper Kyoto",area:"Rokkaku-dori / Tomikoji",hours:"12:00–20:00, closed Wed",why:"Townhouse with a small garden and tatami room; made-in-Japan cuts plus Kyoto-only pieces.",lat:35.007417,lng:135.765245,src:"https://www.houyhnhnm.jp/en/feature/360471"},
  // ---- Kyoto shoes
+ {id:"k25",city:"kyoto",cat:"clothing",style:["yoshiokubo"],p:[2,3],name:"Kyoto Takashimaya",area:"Shijo-Kawaramachi · style&edit 3F, CASE STUDY 4F",why:"muller of yoshiokubo at style&edit (3F); the men's line was listed at CASE STUDY (4F) in 2022, so ask.",lat:35.003477,lng:135.768639,src:"https://mullerofyoshiokubo.jp/pages/stockist"},
+ {id:"k26",city:"kyoto",cat:"clothing",style:["yoshiokubo"],p:[2,3],name:"DRESSTERIOR Kyoto BAL",area:"Kyoto BAL 4F, Kawaramachi-Sanjo",why:"Stocks muller of yoshiokubo, one floor above and wander.",lat:35.006937,lng:135.769650,src:"https://mullerofyoshiokubo.jp/pages/stockist"},
  {id:"k13",city:"kyoto",cat:"shoes",style:["Craft"],p:[1,2],name:"SOU・SOU Tabi",area:"Shinkyogoku side streets, near Nishiki Market",why:"Japan-made jika-tabi, new shop since July 2026. Bonded-sole tabi ¥12,870, leather ¥44,900. Ask for plain colours.",lat:35.004376,lng:135.768144,src:"https://haveagood-holiday.com/en/articles/sou-sou-tabi-kyoto-relocation-renewal-opening"},
  {id:"k14",city:"kyoto",cat:"shoes",style:["Craft"],p:[2,2],name:"Gion Naito",area:"Gion",why:"Hand-made zori sandals, traditional and modern, made to fit.",lat:35.002353,lng:135.772736,src:"https://highsnobiety.com/p/gion-naito-interview"},
  {id:"k15",city:"kyoto",cat:"shoes",style:["Craft"],p:[2,2],name:"Hakimono Sekizuka",area:"Iwakura, north Kyoto (Iwakura AA)",why:"A young craftsman's hand-made zori in a former timber warehouse; a destination trip.",lat:35.072102,lng:135.798271,src:"https://monocle.com/fashion/handmade-japanese-zouri-sandals-kyoto/"},
@@ -99,12 +104,12 @@ var SHOPS = [
 var ROUTES = {
   tokyo: [
     {id:"r-t1",name:"Day 1 · Daikanyama, Ebisu, Shirokane",note:"Quiet backstreets; finish with a taxi to Yaeca.",stops:["t1","t33","t11","t4","t28","t7"]},
-    {id:"r-t2",name:"Day 2 · Shibuya, Harajuku, Aoyama",note:"The big day: gorpcore and Yohji in Shibuya, resale on Cat Street, Issey and Auralee in Aoyama.",stops:["t12","t37","t10","t6","t17","t46","t25","t14","t34","t36","t19","t5","t8","t44","t31","t32","t22","t21"]},
-    {id:"r-t3",name:"Half day · Marunouchi and Ginza",note:"Add the Oedo Antique Market on market days.",stops:["t45","t15","t13","t16","t38","t2","t43","t41","t24","t30","t29","t9","t40","t42","t18"]},
+    {id:"r-t2",name:"Day 2 · Shibuya, Harajuku, Aoyama",note:"The big day: gorpcore and Yohji in Shibuya, resale on Cat Street, Issey and Auralee in Aoyama.",stops:["t12","t37","t10","t6","t17","t46","t25","t14","t34","t36","t19","t49","t5","t8","t44","t31","t32","t47","t22","t21"]},
+    {id:"r-t3",name:"Half day · Marunouchi and Ginza",note:"Add the Oedo Antique Market on market days.",stops:["t45","t15","t13","t16","t38","t2","t43","t41","t24","t30","t29","t9","t40","t42","t18","t48"]},
     {id:"r-t4",name:"Short trips",note:"Shimokitazawa, Jiyugaoka and the east side each make an easy half day.",stops:["t3","t35","t23","t26","t27"]}
   ],
   kyoto: [
-    {id:"r-k1",name:"Downtown walk",note:"Almost everything within 15 minutes on foot between Oike, Karasuma and Kawaramachi.",stops:["k9","k18","k17","k4","k7","k12","k6","k5","k11","k13","k19","k1","k10","k22"]},
+    {id:"r-k1",name:"Downtown walk",note:"Almost everything within 15 minutes on foot between Oike, Karasuma and Kawaramachi.",stops:["k9","k18","k17","k4","k7","k12","k6","k5","k11","k13","k19","k25","k1","k10","k26","k22"]},
     {id:"r-k2",name:"Higashiyama",note:"Combine with Kiyomizu-dera and Gion.",stops:["k14","k23","k24"]},
     {id:"r-k3",name:"Further out",note:"Pair each with sightseeing: Arashiyama bamboo grove, Toji, Kitano Tenmangu, Fushimi.",stops:["k2","k20","k21","k8","k16"]}
   ]
